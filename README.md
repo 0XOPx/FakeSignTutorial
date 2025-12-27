@@ -1,36 +1,39 @@
-# Open PowerShell as administrator
-     Invoke-Command -ScriptBlock {
-# Right click Start Menu > Windows PowerShell (Admin) or Terminal (Admin)
+# Step 1: Open PowerShell as Administrator
+# (Right-click Start → Windows PowerShell (Admin) or Terminal (Admin))
 
-# Step 2: 
-     # Step 2:
+# Step 2: Create folder and certificate
+New-Item -Path "C:\Cert" -ItemType Directory -Force
 
-New-Item -Path "C:\Cert" -ItemType
-$cert = New-SelfSignedCertificate -Type CodeSigning
--Subject "CN=OX
--ImportantAlgorithm RSA `
--KeyLength 2048
--HashAlgorithm SHA256 `
+$cert = New-SelfSignedCertificate -Type CodeSigningCert `
+    -Subject "CN=OXOP" `
+    -KeyAlgorithm RSA `
+    -KeyLength 2048 `
+    -HashAlgorithm SHA256 `
+    -CertStoreLocation "Cert:\CurrentUser\My" `
+    -NotAfter (Get-Date).AddYears(10)
 
--CertStoreLocation "Cert
-NotAfter = ((
+Export-PfxCertificate -Cert $cert `
+    -FilePath "C:\Cert\OXOP.pfx" `
+    -Password (ConvertTo-SecureString -String "OXOP" -Force -AsPlainText)
 
-& Export-PfxCertificate -Cert $
+Export-Certificate -Cert $cert -FilePath "C:\Cert\OXOP.cer"
+# Trust the Certificate (so it shows "Verified publisher")
 
--FilePath "C:\Cert
--Password (ConvertTo-SecureString -String "OX
-Export-Certificate -Cert $cert -FilePath "
-# Trust the Certificate (to ensure it shows 'Verified publisher')
-1. Double-click C
-2. Click 'Install Certificate'
-3. Choose Local Machine --> Next
-4. Select **Place all certificates in the following store**
-5. Browse → Trusted People → OK → Next → Finish
-6. Click “Yes” in the security message
-# SIGN your EXE (execute in admin Command Prompt)
-"C:\Program Files (x86)\Windows Kits\
-/f "C:\Cert
-/p OXOP ^=
-/tr http://timestamp.ac
-/td SHA256 ^
-/fd "SHA256 "^ /v "C # Distribute - Share the signed EXE + all required files. - On other computers, “signature” will display your name in detail. - To display the "Verified publisher" there as well: provide them with the `.cer` file and ask them to install this file in the **Trusted People** folder (as the steps above).
+1. Double-click `C:\Cert\OXOP.cer`
+2. Click **Install Certificate**
+3. Select **Local Machine** → Next
+4. Choose **Place all certificates in the following store**
+5. Browse → **Trusted People** → OK → Next → Finish
+6. Click **Yes** on the security warning
+# Sign your EXE (run in admin Command Prompt)
+"C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\signtool.exe" sign ^
+    /f "C:\Cert\OXOP.pfx" ^
+    /p OXOP ^
+    /tr http://timestamp.acs.microsoft.com ^
+    /td SHA256 ^
+    /fd SHA256 ^
+    /v "C:\Path\To\YourApp.exe"
+# Distribute
+- Share the signed EXE + all required files.
+- On other machines: signature shows your name in details.
+- To show "Verified publisher" there too: give them the `.cer` file and have them install it to **Trusted People** (same steps above).
