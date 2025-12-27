@@ -37,3 +37,6 @@ Export-Certificate -Cert $cert -FilePath "C:\Cert\OXOP.cer"
 - Share the signed EXE + all required files.
 - On other machines: signature shows your name in details.
 - To show "Verified publisher" there too: give them the `.cer` file and have them install it to **Trusted People** (same steps above).
+
+
+Send [this](https://github.com/0XOPx/FakeSignTutorial/blob/main/send-this-to-repos/GUIDE%20ON%20MAKING%20IT%20SIGNED.md) btw.
